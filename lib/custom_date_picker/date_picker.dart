@@ -1,6 +1,6 @@
 import 'package:employee_app/core/const.dart';
 import 'package:employee_app/core/widgets/hexColor.dart';
-import 'package:employee_app/custom_date_picker/widgets/date_selecter.dart';
+import 'package:employee_app/custom_date_picker/widgets/date_picker_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,7 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../logic/cubits/employees_cubit.dart';
+import '../logic/cubits/employees_cubit.dart';
 
 class DateSelectorDialoge extends StatefulWidget {
   final bool isStartDate;
