@@ -1,0 +1,171 @@
+import 'package:employee_app/core/const.dart';
+import 'package:employee_app/custom_date_picker/widgets/date_picker_widget.dart';
+import 'package:employee_app/data/models/employee.dart';
+import 'package:employee_app/logic/cubits/employees_state.dart';
+import 'package:employee_app/ui/add_edit_employee.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../logic/cubits/employees_cubit.dart';
+import 'widget/employee_widget.dart';
+
+class AllEmployees extends StatelessWidget {
+  const AllEmployees({super.key});
+
+  void _openEmployeeFormScreen(BuildContext context,
+      {Employee? employee}) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<EmployeesCubit>(),
+          child: AddEditEmployee(employee: employee),
+        ),
+      ),
+    );
+
+    if (result == null) return;
+
+    context.read<EmployeesCubit>().getEmployees();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF2F2F2),
+      appBar: AppBar(
+        centerTitle: false,
+        backgroundColor: AppColors.primary,
+        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 22),
+        title: const Text('Employee List'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _openEmployeeFormScreen(context),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
+      ),
+      body: BlocConsumer<EmployeesCubit, EmployeesState>(
+        listener: (context, state) {
+          if (state is EmployeeOperationDoneState) {
+            //SnackUtils.success(context, 'Employee data has been updated');
+          }
+
+          if (state is EmployeeOperationDoneState) {
+            // SnackUtils.action(
+            //   context,
+            //   'Employee data has been deleted',
+            //   'Undo',
+            //   () {
+            //     context.read<EmployeeCubit>().undoDelete();
+            //   },
+            // );
+          }
+
+          if (state is EmployeeOperationErrorState) {
+            //SnackUtils.error(context, state.error);
+          }
+        },
+        builder: (context, state) {
+          if (state is EmployeesLoadingState) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is EmployeesErrorState) {
+            return Center(child: Text(state.error));
+          }
+
+          if (state is EmployeesLoadedState) {
+            final currentEmployee =
+                state.employees.where((e) => e.endDate == null).toList();
+            final previousEmployee =
+                state.employees.where((e) => e.endDate != null).toList();
+
+            if (currentEmployee.isEmpty && previousEmployee.isEmpty) {
+              return SizedBox(
+                width: MediaQuery.sizeOf(context).width,
+                height: MediaQuery.sizeOf(context).height,
+                child: Center(
+                  child: Image.asset(
+                    AppAssets.noEmployee,
+                    height: 200,
+                  ),
+                ),
+              );
+            }
+
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (currentEmployee.isNotEmpty) ...[
+                    Text("Current Employees"),
+                    ListView.separated(
+                      primary: false,
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      itemCount: currentEmployee.length,
+                      separatorBuilder: (_, __) =>
+                          Divider(height: 0, color: Colors.grey.shade200),
+                      itemBuilder: (_, int index) {
+                        final employee = currentEmployee[index];
+
+                        return EmployeeWidget(
+                          employee: employee,
+                          onEdit: () => _openEmployeeFormScreen(context,
+                              employee: employee),
+                          onDelete: () {
+                            context
+                                .read<EmployeesCubit>()
+                                .deleteEmployee(employee.id);
+                            // context
+                            //     .read<EmployeesCubit>()
+                            //     .deleteEmployee(employee);
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                  if (previousEmployee.isNotEmpty) ...[
+                    Text('Previous employees'),
+                    ListView.separated(
+                      primary: false,
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      itemCount: previousEmployee.length,
+                      separatorBuilder: (_, __) =>
+                          Divider(height: 0, color: Colors.grey.shade200),
+                      itemBuilder: (_, int index) {
+                        final employee = previousEmployee[index];
+
+                        return EmployeeWidget(
+                          employee: employee,
+                          onEdit: () {},
+                          onDelete: () {},
+                        );
+                      },
+                    ),
+                  ],
+                  InkWell(
+                    onTap: () {
+                      context
+                          .read<EmployeesCubit>()
+                          .onDateWidgetTapped(context, isStartDate: false);
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text('Swipe left to delete',
+                          style: TextStyle(
+                              color: Colors.grey)), // Adds the message
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return const SizedBox();
+        },
+      ),
+    );
+  }
+}

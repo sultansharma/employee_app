@@ -105,12 +105,13 @@ Employee _employeeDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Employee();
-  object.endDate = reader.readDateTime(offsets[0]);
+  final object = Employee(
+    endDate: reader.readDateTimeOrNull(offsets[0]),
+    name: reader.readString(offsets[1]),
+    role: reader.readString(offsets[2]),
+    startDate: reader.readDateTime(offsets[3]),
+  );
   object.id = id;
-  object.name = reader.readStringOrNull(offsets[1]);
-  object.role = reader.readStringOrNull(offsets[2]);
-  object.startDate = reader.readDateTime(offsets[3]);
   return object;
 }
 
@@ -122,13 +123,13 @@ P _employeeDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -387,8 +388,24 @@ extension EmployeeQueryWhere on QueryBuilder<Employee, Employee, QWhereClause> {
 
 extension EmployeeQueryFilter
     on QueryBuilder<Employee, Employee, QFilterCondition> {
+  QueryBuilder<Employee, Employee, QAfterFilterCondition> endDateIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'endDate',
+      ));
+    });
+  }
+
+  QueryBuilder<Employee, Employee, QAfterFilterCondition> endDateIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'endDate',
+      ));
+    });
+  }
+
   QueryBuilder<Employee, Employee, QAfterFilterCondition> endDateEqualTo(
-      DateTime value) {
+      DateTime? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'endDate',
@@ -398,7 +415,7 @@ extension EmployeeQueryFilter
   }
 
   QueryBuilder<Employee, Employee, QAfterFilterCondition> endDateGreaterThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -411,7 +428,7 @@ extension EmployeeQueryFilter
   }
 
   QueryBuilder<Employee, Employee, QAfterFilterCondition> endDateLessThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -424,8 +441,8 @@ extension EmployeeQueryFilter
   }
 
   QueryBuilder<Employee, Employee, QAfterFilterCondition> endDateBetween(
-    DateTime lower,
-    DateTime upper, {
+    DateTime? lower,
+    DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -784,8 +801,24 @@ extension EmployeeQueryFilter
     });
   }
 
+  QueryBuilder<Employee, Employee, QAfterFilterCondition> startDateIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'startDate',
+      ));
+    });
+  }
+
+  QueryBuilder<Employee, Employee, QAfterFilterCondition> startDateIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'startDate',
+      ));
+    });
+  }
+
   QueryBuilder<Employee, Employee, QAfterFilterCondition> startDateEqualTo(
-      DateTime value) {
+      DateTime? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'startDate',
@@ -795,7 +828,7 @@ extension EmployeeQueryFilter
   }
 
   QueryBuilder<Employee, Employee, QAfterFilterCondition> startDateGreaterThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -808,7 +841,7 @@ extension EmployeeQueryFilter
   }
 
   QueryBuilder<Employee, Employee, QAfterFilterCondition> startDateLessThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -821,8 +854,8 @@ extension EmployeeQueryFilter
   }
 
   QueryBuilder<Employee, Employee, QAfterFilterCondition> startDateBetween(
-    DateTime lower,
-    DateTime upper, {
+    DateTime? lower,
+    DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -994,7 +1027,7 @@ extension EmployeeQueryProperty
     });
   }
 
-  QueryBuilder<Employee, DateTime, QQueryOperations> endDateProperty() {
+  QueryBuilder<Employee, DateTime?, QQueryOperations> endDateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'endDate');
     });
@@ -1012,7 +1045,7 @@ extension EmployeeQueryProperty
     });
   }
 
-  QueryBuilder<Employee, DateTime, QQueryOperations> startDateProperty() {
+  QueryBuilder<Employee, DateTime?, QQueryOperations> startDateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'startDate');
     });
