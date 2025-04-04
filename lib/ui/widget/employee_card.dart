@@ -1,17 +1,21 @@
+import 'package:employee_app/core/const.dart';
 import 'package:employee_app/data/models/employee.dart';
+import 'package:employee_app/ui/widget/from_to_date.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-class EmployeeWidget extends StatelessWidget {
-  EmployeeWidget({
-    super.key,
-    required this.employee,
-    required this.onEdit,
-    required this.onDelete,
-  });
+class EmployeeCard extends StatelessWidget {
+  EmployeeCard(
+      {super.key,
+      required this.employee,
+      required this.onEdit,
+      required this.onDelete,
+      this.bgColor});
 
   final Employee employee;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final Color? bgColor;
   bool isPastEmployee = false;
 
   String _getDateString() {
@@ -38,15 +42,14 @@ class EmployeeWidget extends StatelessWidget {
         onDelete();
       },
       background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20.0),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
+          color: Colors.red,
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20.0),
+          child: SvgPicture.asset(AppAssets.removeIcon, color: Colors.white)),
       child: InkWell(
         onTap: onEdit,
         child: Container(
-          color: Colors.white,
+          color: bgColor ?? Colors.white,
           padding: const EdgeInsets.only(top: 8, bottom: 8, left: 16),
           width: MediaQuery.sizeOf(context).width,
           child: Column(
@@ -55,8 +58,8 @@ class EmployeeWidget extends StatelessWidget {
             children: [
               Text(
                 employee.name ?? "N/A",
-                style: TextStyle(
-                  color: const Color(0xFF323238),
+                style: const TextStyle(
+                  color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -64,21 +67,14 @@ class EmployeeWidget extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 employee.role ?? "N/A",
-                style: TextStyle(
-                  color: const Color(0xFF949C9E),
+                style: const TextStyle(
+                  color: AppColors.subTitle,
                   fontWeight: FontWeight.w500,
                   fontSize: 14,
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                date,
-                style: TextStyle(
-                  color: const Color(0xFF949C9E),
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                ),
-              ),
+              getFromToDate(employee.startDate, employee.endDate)
             ],
           ),
         ),

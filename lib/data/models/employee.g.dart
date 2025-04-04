@@ -15,7 +15,7 @@ extension GetEmployeeCollection on Isar {
 
 const EmployeeSchema = CollectionSchema(
   name: r'Employee',
-  id: 3568472634033989540,
+  id: 35684726340339,
   properties: {
     r'endDate': PropertySchema(
       id: 0,
@@ -45,7 +45,7 @@ const EmployeeSchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'name': IndexSchema(
-      id: 879695947855722453,
+      id: 879695947855,
       name: r'name',
       unique: false,
       replace: false,

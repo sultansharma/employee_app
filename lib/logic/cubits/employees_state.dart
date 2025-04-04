@@ -22,6 +22,8 @@ class EmployeeEditingState extends EmployeesState {}
 
 class EmployeeEditedState extends EmployeesState {}
 
+class EmployeeDeletedState extends EmployeesState {}
+
 class EmployeesFormState extends EmployeesState {
   final String name;
   final String role;
@@ -37,7 +39,9 @@ class EmployeesFormState extends EmployeesState {
 }
 
 //State that show employee is deleted/updated etc.
-class EmployeeOperationDoneState extends EmployeesState {}
+class EmployeeOperationAddedState extends EmployeesState {}
+
+class EmployeeOperationUpdatedState extends EmployeesState {}
 
 class EmployeeOperationErrorState extends EmployeesState {
   final String? error;

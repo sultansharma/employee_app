@@ -4,12 +4,12 @@ part 'employee.g.dart';
 
 @Collection()
 class Employee {
-  Id id = Isar.autoIncrement;
+  int id = Isar.autoIncrement;
   @Index(type: IndexType.value)
-  String name;
-  String role;
-  DateTime startDate;
-  DateTime? endDate;
+  late String name;
+  late String role;
+  late DateTime startDate;
+  late DateTime? endDate;
 
   Employee({
     required this.name,

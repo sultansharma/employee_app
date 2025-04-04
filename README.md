@@ -20,6 +20,6 @@ Database operations (Add/Delete employees) working successfully.
 🛠️ Tech Stack
 
 Database: Isar (Local NoSQL database for Flutter)
-State Management: BLoC/Cubit (for better scalability)
+State Management: BLoC/Cubit 
 Icons: flutter_svg (for SVG icons)
 Responsive UI: flutter_screenutil (for adaptive design)

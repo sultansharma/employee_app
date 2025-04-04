@@ -1,5 +1,6 @@
+import 'package:employee_app/core/const.dart';
 import 'package:employee_app/core/widgets/myToast.dart';
-import 'package:employee_app/custom_date_picker/widgets/date_selecter.dart';
+import 'package:employee_app/custom_date_picker/widgets/date_picker_helper.dart';
 import 'package:employee_app/data/database/isar.dart';
 
 import 'package:employee_app/logic/cubits/employees_state.dart';
@@ -8,14 +9,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
 
-import '../../custom_date_picker/widgets/date_picker_widget.dart';
+import '../../custom_date_picker/date_picker.dart';
 import '../../data/models/employee.dart';
 
 class EmployeesCubit extends Cubit<EmployeesState> {
   EmployeesCubit() : super(EmployeesLoadingState());
   final db = DatabaseService.db;
+  Employee? _recentlyDeletedEmployee;
+  int? editingId; //Only For desktop
 
   getEmployees() async {
+    emit(EmployeesLoadingState());
     try {
       List<Employee> employees = await db.employees.where().findAll();
       emit(EmployeesLoadedState(employees));
@@ -24,46 +28,71 @@ class EmployeesCubit extends Cubit<EmployeesState> {
     }
   }
 
-  Future<Employee> addEmployee(String name) async {
-    final employee = Employee(
-        name: name,
-        role: roleController.text,
-        startDate: startDate,
-        endDate: endDate);
-    try {
-      db.writeTxn(() async => await db.employees.put(employee));
-      emit(EmployeeOperationDoneState());
-      getEmployees();
-    } catch (e) {
-      emit(EmployeeOperationErrorState('Error updating employee: $e'));
+  Future<Employee?> addEmployee() async {
+    print("Editing Id" + editingId.toString());
+    if (validateInputs()) {
+      final employee = Employee(
+          name: empNameController.text,
+          role: roleController.text,
+          startDate: startDate,
+          endDate: endDate);
+      try {
+        await db.writeTxn(() async => await db.employees.put(employee));
+        emit(EmployeeOperationAddedState());
+        await getEmployees();
+      } catch (e) {
+        emit(EmployeeOperationErrorState('Error updating employee: $e'));
+      }
+      return employee;
+    } else {
+      await getEmployees();
+      return null;
     }
-    return employee;
   }
 
-  Future<void> updateEmployee(int id, String name, String role,
-      DateTime starDate, DateTime? endDate) async {
-    try {
-      final employee = await db.employees.get(id);
-      if (employee != null) {
-        employee.name = name;
-        employee.role = role;
-        employee.startDate = starDate;
-        employee.endDate = endDate;
-        await db.writeTxn(() async {
-          await db.employees.put(employee);
-        });
+  Future<bool> updateEmployee(int id) async {
+    editingId = id; //Only for desktop
+    if (validateInputs()) {
+      try {
+        final employee = await db.employees.get(id);
+        if (employee != null) {
+          employee.name = empNameController.text;
+          employee.role = roleController.text;
+          employee.startDate = startDate;
+          employee.endDate = endDate;
+          await db.writeTxn(() async {
+            await db.employees.put(employee);
+          });
+        }
+        emit(EmployeeOperationUpdatedState());
+        await getEmployees();
+        return true;
+      } catch (e) {
+        emit(EmployeeOperationErrorState('Error updating employee: $e'));
+        return false;
       }
-      emit(EmployeeOperationDoneState());
-    } catch (e) {
-      emit(EmployeeOperationErrorState('Error updating employee: $e'));
     }
+    await getEmployees();
+    return false;
   }
 
   Future<void> deleteEmployee(int id) async {
     try {
-      db.writeTxn<bool>(() async => await db.employees.delete(id));
+      _recentlyDeletedEmployee = await db.employees.get(id);
+      await db.writeTxn<bool>(() async => await db.employees.delete(id));
+      emit(EmployeeDeletedState());
+      await getEmployees();
     } catch (e) {
       emit(EmployeeOperationErrorState('Error deleting employees: $e'));
+    }
+  }
+
+  void undoDelete() async {
+    if (_recentlyDeletedEmployee != null) {
+      onEditTapped(_recentlyDeletedEmployee!);
+      addEmployee();
+      _recentlyDeletedEmployee = null;
+      await getEmployees(); // Clear the temporary storage
     }
   }
 
@@ -75,6 +104,16 @@ class EmployeesCubit extends Cubit<EmployeesState> {
   TextEditingController endDateController = TextEditingController();
   late DateTime startDate;
   DateTime? endDate;
+
+  void onEditTapped(Employee employee) {
+    editingId = employee.id;
+    empNameController.text = employee.name;
+    roleController.text = employee.role;
+    startDate = employee.startDate;
+    endDate = employee.endDate;
+    startDateController.text = DatePickerHelper.formatDate(employee.startDate);
+    endDateController.text = DatePickerHelper.formatDate(employee.endDate);
+  }
 
   void onDateWidgetTapped(BuildContext context,
       {required bool isStartDate}) async {
@@ -105,7 +144,8 @@ class EmployeesCubit extends Cubit<EmployeesState> {
       endDate = selectedDate;
       endDateController.text = DatePickerHelper.formatDate(endDate);
     } else {
-      myToast(context, text: "End date can't be before Start date");
+      emit(EmployeeOperationErrorState(AppStrings.endDateShouldOlder));
+      //myToast(context, text: "End date can't be before Start date");
     }
   }
 
@@ -116,5 +156,44 @@ class EmployeesCubit extends Cubit<EmployeesState> {
       builder: (context) => SelectRole(),
     );
     if (role != null) roleController.text = role;
+  }
+
+  void resetForm() {
+    editingId = null;
+    empNameController.clear();
+    roleController.clear();
+    startDateController.clear();
+    endDateController.clear();
+    startDate = DateTime.now(); // Default to current date or some initial value
+    endDate = null;
+  }
+
+  //Validations
+
+  bool validateInputs() {
+    // Check if the fields are empty
+    if (empNameController.text.isEmpty ||
+        roleController.text.isEmpty ||
+        startDateController.text.isEmpty) {
+      emit(EmployeeOperationErrorState(AppStrings.fillAll));
+
+      return false;
+    }
+
+    // Validate name: only alphanumeric (letters and numbers)
+    String trimmedName = empNameController.text.trim();
+
+    if (!RegExp(r'^[a-zA-Z0-9]+( [a-zA-Z0-9]+)*$').hasMatch(trimmedName)) {
+      emit(EmployeeOperationErrorState(AppStrings.correctName));
+      return false;
+    }
+
+    // You can also add a check for the role if needed (optional)
+    if (roleController.text.isEmpty) {
+      emit(EmployeeOperationErrorState(AppStrings.selectRole));
+      return false;
+    }
+
+    return true; // Everything is valid
   }
 }

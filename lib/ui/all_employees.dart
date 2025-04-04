@@ -1,37 +1,37 @@
 import 'package:employee_app/core/const.dart';
-import 'package:employee_app/custom_date_picker/widgets/date_picker_widget.dart';
+import 'package:employee_app/core/widgets/myToast.dart';
+import 'package:employee_app/custom_date_picker/date_picker.dart';
 import 'package:employee_app/data/models/employee.dart';
 import 'package:employee_app/logic/cubits/employees_state.dart';
 import 'package:employee_app/ui/add_edit_employee.dart';
+import 'package:employee_app/ui/widget/emplyee_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../logic/cubits/employees_cubit.dart';
-import 'widget/employee_widget.dart';
+import 'widget/employee_card.dart';
 
 class AllEmployees extends StatelessWidget {
   const AllEmployees({super.key});
 
   void _openEmployeeFormScreen(BuildContext context,
       {Employee? employee}) async {
-    final result = await Navigator.of(context).push(
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => BlocProvider.value(
           value: context.read<EmployeesCubit>(),
-          child: AddEditEmployee(employee: employee),
+          child: AddEditEmployee(
+            employee: employee,
+          ),
         ),
       ),
     );
-
-    if (result == null) return;
-
-    context.read<EmployeesCubit>().getEmployees();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
+      backgroundColor: AppColors.bgGrey,
       appBar: AppBar(
         centerTitle: false,
         backgroundColor: AppColors.primary,
@@ -46,23 +46,24 @@ class AllEmployees extends StatelessWidget {
       ),
       body: BlocConsumer<EmployeesCubit, EmployeesState>(
         listener: (context, state) {
-          if (state is EmployeeOperationDoneState) {
-            //SnackUtils.success(context, 'Employee data has been updated');
+          if (state is EmployeeOperationUpdatedState) {
+            myToast(context,
+                type: 'done', text: 'Employee data has been updated.');
+          }
+          if (state is EmployeeOperationAddedState) {
+            myToast(context,
+                type: 'done', text: 'Employee data has been added.');
           }
 
-          if (state is EmployeeOperationDoneState) {
-            // SnackUtils.action(
-            //   context,
-            //   'Employee data has been deleted',
-            //   'Undo',
-            //   () {
-            //     context.read<EmployeeCubit>().undoDelete();
-            //   },
-            // );
-          }
-
-          if (state is EmployeeOperationErrorState) {
-            //SnackUtils.error(context, state.error);
+          if (state is EmployeeDeletedState) {
+            myToast(
+              context,
+              text: 'Employee data has been deleted',
+              undo: true,
+              onPressed: () {
+                context.read<EmployeesCubit>().undoDelete();
+              },
+            );
           }
         },
         builder: (context, state) {
@@ -98,7 +99,7 @@ class AllEmployees extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (currentEmployee.isNotEmpty) ...[
-                    Text("Current Employees"),
+                    header(AppStrings.curEmployees),
                     ListView.separated(
                       primary: false,
                       shrinkWrap: true,
@@ -109,24 +110,26 @@ class AllEmployees extends StatelessWidget {
                       itemBuilder: (_, int index) {
                         final employee = currentEmployee[index];
 
-                        return EmployeeWidget(
+                        return EmployeeCard(
                           employee: employee,
-                          onEdit: () => _openEmployeeFormScreen(context,
-                              employee: employee),
-                          onDelete: () {
+                          onEdit: () {
                             context
                                 .read<EmployeesCubit>()
+                                .onEditTapped(employee);
+                            _openEmployeeFormScreen(context,
+                                employee: employee);
+                          },
+                          onDelete: () async {
+                            await context
+                                .read<EmployeesCubit>()
                                 .deleteEmployee(employee.id);
-                            // context
-                            //     .read<EmployeesCubit>()
-                            //     .deleteEmployee(employee);
                           },
                         );
                       },
                     ),
                   ],
                   if (previousEmployee.isNotEmpty) ...[
-                    Text('Previous employees'),
+                    header(AppStrings.prevEmployees),
                     ListView.separated(
                       primary: false,
                       shrinkWrap: true,
@@ -137,26 +140,29 @@ class AllEmployees extends StatelessWidget {
                       itemBuilder: (_, int index) {
                         final employee = previousEmployee[index];
 
-                        return EmployeeWidget(
+                        return EmployeeCard(
                           employee: employee,
-                          onEdit: () {},
-                          onDelete: () {},
+                          onEdit: () {
+                            context
+                                .read<EmployeesCubit>()
+                                .onEditTapped(employee);
+                            _openEmployeeFormScreen(context,
+                                employee: employee);
+                          },
+                          onDelete: () {
+                            context
+                                .read<EmployeesCubit>()
+                                .deleteEmployee(employee.id);
+                          },
                         );
                       },
                     ),
                   ],
-                  InkWell(
-                    onTap: () {
-                      context
-                          .read<EmployeesCubit>()
-                          .onDateWidgetTapped(context, isStartDate: false);
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text('Swipe left to delete',
-                          style: TextStyle(
-                              color: Colors.grey)), // Adds the message
-                    ),
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text('Swipe left to delete',
+                        style:
+                            TextStyle(color: Colors.grey)), // Adds the message
                   ),
                 ],
               ),

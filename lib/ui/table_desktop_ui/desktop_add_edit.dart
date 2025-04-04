@@ -1,17 +1,16 @@
+import 'package:employee_app/core/const.dart';
 import 'package:employee_app/core/widgets/myToast.dart';
 import 'package:employee_app/core/widgets/inputDecoration.dart';
 import 'package:employee_app/custom_date_picker/widgets/date_picker_helper.dart';
 import 'package:employee_app/data/models/employee.dart';
+import 'package:employee_app/logic/cubits/employees_cubit.dart';
 import 'package:employee_app/logic/cubits/employees_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../core/const.dart';
-import '../logic/cubits/employees_cubit.dart';
-
-class AddEditEmployee extends StatefulWidget {
-  const AddEditEmployee({
+class DesktopAddEdit extends StatefulWidget {
+  const DesktopAddEdit({
     super.key,
     this.employee,
   });
@@ -19,10 +18,10 @@ class AddEditEmployee extends StatefulWidget {
   final Employee? employee;
 
   @override
-  State<AddEditEmployee> createState() => _AddEditEmployeeState();
+  State<DesktopAddEdit> createState() => _DesktopAddEditState();
 }
 
-class _AddEditEmployeeState extends State<AddEditEmployee> {
+class _DesktopAddEditState extends State<DesktopAddEdit> {
   final _formKey = GlobalKey<FormState>();
 
   bool get _isEditing => widget.employee != null;
@@ -57,20 +56,10 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
   void _onSave() async {
     if (!mounted) return;
 
-    if (_isEditing) {
-      final employee = await context
-          .read<EmployeesCubit>()
-          .updateEmployee(widget.employee!.id);
-
-      if (mounted && employee) {
-        Navigator.of(context).pop();
-      }
+    if (context.read<EmployeesCubit>().editingId != null) {
+      await context.read<EmployeesCubit>().updateEmployee(widget.employee!.id);
     } else {
-      final employee = await context.read<EmployeesCubit>().addEmployee();
-
-      if (mounted && employee != null) {
-        Navigator.of(context).pop(employee);
-      }
+      await context.read<EmployeesCubit>().addEmployee();
     }
   }
 
@@ -81,22 +70,27 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: false,
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.border,
         automaticallyImplyLeading: false,
         // iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 22),
-        title: Text('${_isEditing ? 'Edit' : 'Add'} Employee Details'),
-        actions: [
-          if (_isEditing) ...[
-            IconButton(
-              onPressed: () async {
-                await cubit.deleteEmployee(widget.employee!.id);
-                Navigator.of(context).pop();
-              },
-              icon: SvgPicture.asset(AppAssets.removeIcon),
-            ),
-          ],
-        ],
+        titleTextStyle: const TextStyle(color: Colors.black, fontSize: 22),
+        title: Text(
+            cubit.editingId != null ? 'Edit Employee Details' : 'Add Employee'),
+        actions: cubit.editingId != null
+            ? [
+                if (_isEditing) ...[
+                  IconButton(
+                    onPressed: () async {
+                      await cubit.deleteEmployee(widget.employee!.id);
+                    },
+                    icon: SvgPicture.asset(
+                      AppAssets.removeIcon,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ]
+            : null,
       ),
       body: BlocConsumer<EmployeesCubit, EmployeesState>(
           listener: (context, state) {
@@ -191,17 +185,6 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: AppColors.lightBlue,
-                        foregroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4)),
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
-                    ),
                     const SizedBox(width: 16),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
