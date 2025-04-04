@@ -17,7 +17,7 @@ A Flutter-based employee management application with local database storage and 
 ### Day 3: Database Functionality
 - Core functionality works seamlessly on mobile.
 - Encountered issues with the web version due to the latest Isar version not being compatible with Flutter Web.
-
+- Tried Hive but no luck ,After trying many others like drift , sqflite etc. finally **Localstore** worked.
 ---
 
 ## 📌 Features
@@ -25,24 +25,12 @@ A Flutter-based employee management application with local database storage and 
 - ✅ **Employee List Management**: View and manage a list of employees.
 - ✅ **Add, Edit, and Delete Employees**: Easily modify employee records.
 - ✅ **Start Date & Optional End Date Selection**: Pick dates with past days disabled.
-- ✅ **Local Database for Offline Storage**: Store data locally using Isar.
+- ✅ **Local Database for Offline Storage**: Store data locally using 'LocalStore'.
+- ✅ **Responsive UI**: Also created Desktop and tablet view to make UI more reactive.
 
 ---
 
-## 🛠️ Tech Stack
 
-- **Database**: [Isar](https://isar.dev/) - A fast, local NoSQL database for Flutter (mobile only).
-- **State Management**: [BLoC/Cubit](https://bloclibrary.dev/) - For efficient state handling.
-- **Icons**: [flutter_svg](https://pub.dev/packages/flutter_svg) - Lightweight SVG icon support.
-- **Responsive UI**: [flutter_screenutil](https://pub.dev/packages/flutter_screenutil) - Adaptive design across screen sizes.
-
----
-
-## ⚠️ Known Issues
-
-- **Web Compatibility**: The latest version of Isar is not fully compatible with Flutter Web, limiting database functionality on browser platforms. Mobile versions (iOS/Android) work as expected.
-
----
 
 ## 📋 Getting Started
 
@@ -54,4 +42,4 @@ A Flutter-based employee management application with local database storage and 
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/employee-app.git
+   git clone https://github.com/sulatansharma/employee-app.git

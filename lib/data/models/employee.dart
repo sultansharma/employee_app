@@ -1,17 +1,12 @@
-import 'package:isar/isar.dart';
-
-part 'employee.g.dart';
-
-@Collection()
 class Employee {
-  int id = Isar.autoIncrement;
-  @Index(type: IndexType.value)
+  late String? id;
   late String name;
   late String role;
   late DateTime startDate;
-  late DateTime? endDate;
+  DateTime? endDate;
 
   Employee({
+    this.id,
     required this.name,
     required this.role,
     required this.startDate,
@@ -25,6 +20,7 @@ class Employee {
     DateTime? endDate,
   }) {
     return Employee(
+      id: id,
       name: name ?? this.name,
       role: role ?? this.role,
       startDate: startDate ?? this.startDate,
@@ -32,12 +28,23 @@ class Employee {
     );
   }
 
-  Employee.fromJson(Map<String, dynamic> json)
-      : name = json['name'] as String,
-        role = json['role'] as String,
-        startDate = json['startDate'] as DateTime,
-        endDate = json['endDate'] as DateTime?;
+  factory Employee.fromMap(Map<String, dynamic> json) {
+    return Employee(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      role: json['role'] as String,
+      startDate: DateTime.parse(json['startDate']),
+      endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
+    );
+  }
 
-  Map<String, dynamic> toJson() =>
-      {'name': name, 'role': role, 'startDate': startDate, 'endDate': endDate};
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'role': role,
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate?.toIso8601String(),
+    };
+  }
 }

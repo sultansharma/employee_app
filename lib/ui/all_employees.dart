@@ -76,10 +76,14 @@ class AllEmployees extends StatelessWidget {
           }
 
           if (state is EmployeesLoadedState) {
-            final currentEmployee =
-                state.employees.where((e) => e.endDate == null).toList();
-            final previousEmployee =
-                state.employees.where((e) => e.endDate != null).toList();
+            final currentEmployee = state.employees
+                .where((e) =>
+                    e.endDate == null || e.endDate!.isAfter(DateTime.now()))
+                .toList();
+            final previousEmployee = state.employees
+                .where((e) =>
+                    e.endDate != null && e.endDate!.isBefore(DateTime.now()))
+                .toList();
 
             if (currentEmployee.isEmpty && previousEmployee.isEmpty) {
               return SizedBox(
@@ -122,7 +126,7 @@ class AllEmployees extends StatelessWidget {
                           onDelete: () async {
                             await context
                                 .read<EmployeesCubit>()
-                                .deleteEmployee(employee.id);
+                                .deleteEmployee(employee.id.toString());
                           },
                         );
                       },
@@ -152,7 +156,7 @@ class AllEmployees extends StatelessWidget {
                           onDelete: () {
                             context
                                 .read<EmployeesCubit>()
-                                .deleteEmployee(employee.id);
+                                .deleteEmployee(employee.id.toString());
                           },
                         );
                       },

@@ -2,14 +2,12 @@ import 'package:employee_app/ui/table_desktop_ui/desktop_add_edit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:employee_app/data/models/employee.dart';
-import 'package:employee_app/ui/add_edit_employee.dart';
 import 'package:employee_app/ui/widget/emplyee_header.dart';
 import 'package:employee_app/logic/cubits/employees_cubit.dart';
 import 'package:employee_app/logic/cubits/employees_state.dart';
 import 'package:employee_app/ui/widget/employee_card.dart';
 import 'package:employee_app/core/const.dart';
 import 'package:employee_app/core/widgets/myToast.dart';
-import 'package:employee_app/core/widgets/inputDecoration.dart';
 
 class DesktopUi extends StatefulWidget {
   const DesktopUi({super.key});
@@ -32,7 +30,7 @@ class _DesktopUiState extends State<DesktopUi> {
   void _selectAddEmployee() {
     context.read<EmployeesCubit>().resetForm();
     setState(() {
-      _addEmployee = true;
+      _addEmployee = !_addEmployee;
     });
   }
 
@@ -89,10 +87,16 @@ class _DesktopUiState extends State<DesktopUi> {
                 }
 
                 if (state is EmployeesLoadedState) {
-                  final currentEmployee =
-                      state.employees.where((e) => e.endDate == null).toList();
-                  final previousEmployee =
-                      state.employees.where((e) => e.endDate != null).toList();
+                  final currentEmployee = state.employees
+                      .where((e) =>
+                          e.endDate == null ||
+                          e.endDate!.isAfter(DateTime.now()))
+                      .toList();
+                  final previousEmployee = state.employees
+                      .where((e) =>
+                          e.endDate != null &&
+                          e.endDate!.isBefore(DateTime.now()))
+                      .toList();
 
                   return Container(
                     height: MediaQuery.of(context).size.height,
@@ -100,69 +104,97 @@ class _DesktopUiState extends State<DesktopUi> {
                       children: [
                         SingleChildScrollView(
                           child: Container(
-                            height: MediaQuery.of(context).size.height,
-                            child: Column(
-                              //crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (currentEmployee.isNotEmpty) ...[
-                                  header(AppStrings.curEmployees),
-                                  ListView.separated(
-                                    primary: false,
-                                    shrinkWrap: true,
-                                    padding: EdgeInsets.zero,
-                                    itemCount: currentEmployee.length,
-                                    separatorBuilder: (_, __) => Divider(
-                                        height: 0, color: Colors.grey.shade200),
-                                    itemBuilder: (_, int index) {
-                                      final employee = currentEmployee[index];
+                            //height: MediaQuery.of(context).size.height,
+                            child: Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (currentEmployee.isEmpty &&
+                                      previousEmployee.isEmpty)
+                                    SizedBox(
+                                      width: MediaQuery.sizeOf(context).width,
+                                      height: MediaQuery.sizeOf(context).height,
+                                      child: Center(
+                                        child: Image.asset(
+                                          AppAssets.noEmployee,
+                                          height: 200,
+                                        ),
+                                      ),
+                                    ),
+                                  if (currentEmployee.isNotEmpty) ...[
+                                    header(AppStrings.curEmployees),
+                                    ListView.separated(
+                                      primary: false,
+                                      shrinkWrap: true,
+                                      padding: EdgeInsets.zero,
+                                      itemCount: currentEmployee.length,
+                                      separatorBuilder: (_, __) => Divider(
+                                          height: 0,
+                                          color: Colors.grey.shade200),
+                                      itemBuilder: (_, int index) {
+                                        final employee = currentEmployee[index];
 
-                                      return EmployeeCard(
-                                        employee: employee,
-                                        bgColor: cubit.editingId != employee.id
-                                            ? Colors.grey.shade50
-                                            : null,
-                                        onEdit: () {
-                                          _selectEditEmployee(employee);
-                                        },
-                                        onDelete: () async {
-                                          await context
-                                              .read<EmployeesCubit>()
-                                              .deleteEmployee(employee.id);
-                                        },
-                                      );
-                                    },
+                                        return EmployeeCard(
+                                          employee: employee,
+                                          bgColor:
+                                              cubit.editingId != employee.id
+                                                  ? Colors.grey.shade50
+                                                  : null,
+                                          onEdit: () {
+                                            _selectEditEmployee(employee);
+                                          },
+                                          onDelete: () async {
+                                            await context
+                                                .read<EmployeesCubit>()
+                                                .deleteEmployee(
+                                                    employee.id.toString());
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                  if (previousEmployee.isNotEmpty) ...[
+                                    header(AppStrings.prevEmployees),
+                                    ListView.separated(
+                                      primary: false,
+                                      shrinkWrap: true,
+                                      padding: EdgeInsets.zero,
+                                      itemCount: previousEmployee.length,
+                                      separatorBuilder: (_, __) => Divider(
+                                          height: 0,
+                                          color: Colors.grey.shade200),
+                                      itemBuilder: (_, int index) {
+                                        final employee =
+                                            previousEmployee[index];
+
+                                        return EmployeeCard(
+                                          employee: employee,
+                                          bgColor:
+                                              cubit.editingId != employee.id
+                                                  ? Colors.grey.shade50
+                                                  : null,
+                                          onEdit: () {
+                                            _selectEditEmployee(employee);
+                                          },
+                                          onDelete: () {
+                                            context
+                                                .read<EmployeesCubit>()
+                                                .deleteEmployee(
+                                                    employee.id.toString());
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                  const Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Text('Swipe left to delete',
+                                        style: TextStyle(
+                                            color: Colors
+                                                .grey)), // Adds the message
                                   ),
                                 ],
-                                if (previousEmployee.isNotEmpty) ...[
-                                  header(AppStrings.prevEmployees),
-                                  ListView.separated(
-                                    primary: false,
-                                    shrinkWrap: true,
-                                    padding: EdgeInsets.zero,
-                                    itemCount: previousEmployee.length,
-                                    separatorBuilder: (_, __) => Divider(
-                                        height: 0, color: Colors.grey.shade200),
-                                    itemBuilder: (_, int index) {
-                                      final employee = previousEmployee[index];
-
-                                      return EmployeeCard(
-                                        employee: employee,
-                                        bgColor: cubit.editingId != employee.id
-                                            ? Colors.grey.shade50
-                                            : null,
-                                        onEdit: () {
-                                          _selectEditEmployee(employee);
-                                        },
-                                        onDelete: () {
-                                          context
-                                              .read<EmployeesCubit>()
-                                              .deleteEmployee(employee.id);
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ],
+                              ),
                             ),
                           ),
                         ),
@@ -173,7 +205,8 @@ class _DesktopUiState extends State<DesktopUi> {
                             onPressed: () => _selectAddEmployee(),
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
-                            child: const Icon(Icons.add),
+                            child:
+                                Icon(_addEmployee ? Icons.remove : Icons.add),
                           ),
                         )
                       ],
@@ -193,12 +226,12 @@ class _DesktopUiState extends State<DesktopUi> {
               child: DesktopAddEdit(employee: _selectedEmployee),
             ),
           ] else ...[
-            Expanded(
+            const Expanded(
               flex: 2,
               child: Center(
                 child: Text(
                   'Select an employee to edit or add a new one.',
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: AppColors.subTitle),
                 ),
               ),
             ),

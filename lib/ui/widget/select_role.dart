@@ -36,10 +36,10 @@ class SelectRole extends StatelessWidget {
                 ),
               ),
             ),
-            Divider(
+            const Divider(
               height: 1,
               thickness: 1,
-              color: AppColors.border,
+              color: AppColors.bgGrey,
             )
           ],
         ),

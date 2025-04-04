@@ -1,14 +1,9 @@
 import 'package:employee_app/core/const.dart';
-import 'package:employee_app/core/widgets/hexColor.dart';
 import 'package:employee_app/custom_date_picker/widgets/date_picker_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
-
-import '../logic/cubits/employees_cubit.dart';
 
 class DateSelectorDialoge extends StatefulWidget {
   final bool isStartDate;
@@ -55,17 +50,20 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       insetPadding: EdgeInsets.symmetric(horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            16.verticalSpace,
-            widget.isStartDate ? startDateOptions() : endDateOptions(),
-            calendarView(context),
-            16.verticalSpace,
-            footerSection(context)
-          ],
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 350),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              16.verticalSpace,
+              widget.isStartDate ? startDateOptions() : endDateOptions(),
+              calendarView(context),
+              16.verticalSpace,
+              footerSection(context)
+            ],
+          ),
         ),
       ),
     );
@@ -75,6 +73,7 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
     return Column(
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Expanded(
               child: _button(
@@ -88,7 +87,10 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
                 },
               ),
             ),
-            16.horizontalSpace,
+            const SizedBox(
+              width: 8,
+            ),
+            // 16.horizontalSpace,
             Expanded(
               child: _button(
                 selected: nextMondaySelected,
@@ -103,7 +105,9 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
             ),
           ],
         ),
-        8.verticalSpace,
+        const SizedBox(
+          height: 8,
+        ),
         Row(
           children: [
             Expanded(
@@ -118,7 +122,9 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
                 },
               ),
             ),
-            16.horizontalSpace,
+            const SizedBox(
+              width: 8,
+            ),
             Expanded(
               child: _button(
                 selected: weekLaterSelected,
@@ -152,7 +158,9 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
             },
           ),
         ),
-        16.horizontalSpace,
+        const SizedBox(
+          width: 8,
+        ),
         Expanded(
           child: _button(
             selected: todaySelected,
@@ -208,13 +216,13 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
         },
         calendarStyle: CalendarStyle(
           outsideDaysVisible: false,
-          selectedDecoration: BoxDecoration(
+          selectedDecoration: const BoxDecoration(
             color: Colors.blue,
             shape: BoxShape.circle,
           ),
           todayTextStyle: TextStyle(color: AppColors.primary),
           todayDecoration: !widget.isStartDate
-              ? BoxDecoration(
+              ? const BoxDecoration(
                   shape: BoxShape.circle,
                 )
               : BoxDecoration(
@@ -226,14 +234,15 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
         headerStyle: HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
-          headerPadding: EdgeInsets.symmetric(
+          headerPadding: const EdgeInsets.symmetric(
             horizontal: 70,
           ),
-          headerMargin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          headerMargin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           leftChevronMargin: EdgeInsets.zero,
           rightChevronMargin: EdgeInsets.zero,
           leftChevronPadding: EdgeInsets.zero,
           rightChevronPadding: EdgeInsets.zero,
+          // Left Chevron Logic Updated
           leftChevronIcon: SvgPicture.asset(AppAssets.arrowPrevIcon),
           rightChevronIcon: SvgPicture.asset(AppAssets.arrowNextIcon),
         ));
@@ -264,7 +273,9 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
                       Navigator.pop(context);
                     },
                   ),
-                  8.horizontalSpace,
+                  const SizedBox(
+                    width: 8,
+                  ),
                   _button(
                     selected: true,
                     text: 'Save',

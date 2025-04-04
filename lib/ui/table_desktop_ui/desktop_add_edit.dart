@@ -1,7 +1,6 @@
 import 'package:employee_app/core/const.dart';
 import 'package:employee_app/core/widgets/myToast.dart';
 import 'package:employee_app/core/widgets/inputDecoration.dart';
-import 'package:employee_app/custom_date_picker/widgets/date_picker_helper.dart';
 import 'package:employee_app/data/models/employee.dart';
 import 'package:employee_app/logic/cubits/employees_cubit.dart';
 import 'package:employee_app/logic/cubits/employees_state.dart';
@@ -57,7 +56,9 @@ class _DesktopAddEditState extends State<DesktopAddEdit> {
     if (!mounted) return;
 
     if (context.read<EmployeesCubit>().editingId != null) {
-      await context.read<EmployeesCubit>().updateEmployee(widget.employee!.id);
+      await context
+          .read<EmployeesCubit>()
+          .updateEmployee(widget.employee!.id.toString());
     } else {
       await context.read<EmployeesCubit>().addEmployee();
     }
@@ -65,146 +66,150 @@ class _DesktopAddEditState extends State<DesktopAddEdit> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<EmployeesCubit>();
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: false,
-        backgroundColor: AppColors.border,
-        automaticallyImplyLeading: false,
-        // iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(color: Colors.black, fontSize: 22),
-        title: Text(
-            cubit.editingId != null ? 'Edit Employee Details' : 'Add Employee'),
-        actions: cubit.editingId != null
-            ? [
-                if (_isEditing) ...[
-                  IconButton(
-                    onPressed: () async {
-                      await cubit.deleteEmployee(widget.employee!.id);
-                    },
-                    icon: SvgPicture.asset(
-                      AppAssets.removeIcon,
-                      color: Colors.red,
-                    ),
-                  ),
-                ],
-              ]
-            : null,
-      ),
-      body: BlocConsumer<EmployeesCubit, EmployeesState>(
-          listener: (context, state) {
+    return BlocConsumer<EmployeesCubit, EmployeesState>(
+      listener: (context, state) {
         if (state is EmployeeOperationErrorState) {
           myToast(context, text: state.error);
         }
-      }, builder: (context, state) {
-        return Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SingleChildScrollView(
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+      },
+      builder: (context, state) {
+        final cubit = context.read<EmployeesCubit>();
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            centerTitle: false,
+            toolbarHeight: 48,
+            backgroundColor: AppColors.border,
+            automaticallyImplyLeading: false,
+            titleTextStyle: const TextStyle(color: Colors.black, fontSize: 15),
+            title: Text(cubit.editingId != null
+                ? 'Edit Employee Details'
+                : 'Add Employee'),
+            actions: cubit.editingId != null && _isEditing
+                ? [
+                    IconButton(
+                      onPressed: () async {
+                        await cubit.deleteEmployee(widget.employee!.id!);
+                      },
+                      icon: SvgPicture.asset(
+                        AppAssets.removeIcon,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ]
+                : null,
+          ),
+          body: _buildFormBody(context, cubit),
+        );
+      },
+    );
+  }
+
+  Widget _buildFormBody(BuildContext context, EmployeesCubit cubit) {
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: cubit.empNameController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a name';
+                        }
+                        return null;
+                      },
+                      decoration: inputDecoration(
+                        AppAssets.employeeIcon,
+                      ).copyWith(
+                        hintText: 'Employee Name',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    GestureDetector(
+                      onTap: () => _showRoleBottomSheet(context),
+                      child: AbsorbPointer(
+                        child: TextFormField(
+                          controller: cubit.roleController,
+                          decoration: inputDecoration(AppAssets.jobRoleIcon,
+                                  sIcon: AppAssets.arrowDownIcon)
+                              .copyWith(hintText: 'Select Role'),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
                       children: [
-                        TextFormField(
-                          controller: cubit.empNameController,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a name';
-                            }
-                            return null;
-                          },
-                          decoration: inputDecoration(
-                            AppAssets.employeeIcon,
-                          ).copyWith(
-                            hintText: 'Employee Name',
+                        Expanded(
+                          child: TextFormField(
+                            onTap: _selectStartDate,
+                            readOnly: true,
+                            style: const TextStyle(fontSize: 14),
+                            controller: cubit.startDateController,
+                            decoration: inputDecoration(AppAssets.calendarIcon)
+                                .copyWith(hintText: 'No Date'),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: () => _showRoleBottomSheet(context),
-                          child: AbsorbPointer(
-                            child: TextFormField(
-                              controller: cubit.roleController,
-                              decoration: inputDecoration(AppAssets.jobRoleIcon,
-                                      sIcon: AppAssets.arrowDownIcon)
-                                  .copyWith(hintText: 'Select Role'),
-                            ),
-                          ),
+                        const SizedBox(width: 16.0),
+                        SvgPicture.asset(
+                          AppAssets.arrowRightIcon,
+                          color: AppColors.primary,
+                          height: 14,
                         ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                onTap: _selectStartDate,
-                                readOnly: true,
-                                style: const TextStyle(fontSize: 14),
-                                controller: cubit.startDateController,
-                                decoration:
-                                    inputDecoration(AppAssets.calendarIcon)
-                                        .copyWith(hintText: 'No Date'),
-                              ),
-                            ),
-                            const SizedBox(width: 16.0),
-                            SvgPicture.asset(
-                              AppAssets.arrowRightIcon,
-                              color: AppColors.primary,
-                              height: 14,
-                            ),
-                            const SizedBox(width: 16.0),
-                            Expanded(
-                              child: TextFormField(
-                                onTap: _selectEndDate,
-                                readOnly: true,
-                                controller: cubit.endDateController,
-                                style: const TextStyle(fontSize: 14),
-                                decoration:
-                                    inputDecoration(AppAssets.calendarIcon)
-                                        .copyWith(hintText: 'No Date'),
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 16.0),
+                        Expanded(
+                          child: TextFormField(
+                            onTap: _selectEndDate,
+                            readOnly: true,
+                            controller: cubit.endDateController,
+                            style: const TextStyle(fontSize: 14),
+                            decoration: inputDecoration(AppAssets.calendarIcon)
+                                .copyWith(hintText: 'No Date'),
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ),
-            ),
-            Divider(
-              color: AppColors.border,
-              thickness: 2,
-            ),
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const SizedBox(width: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: const Color(0xFF1DA1F2),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4)),
-                      ),
-                      onPressed: _onSave,
-                      child: const Text('Save'),
-                    ),
-                    const SizedBox(width: 16),
                   ],
                 ),
               ),
             ),
-          ],
-        );
-      }),
+          ),
+        ),
+        Divider(
+          color: AppColors.border,
+          thickness: 2,
+        ),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFF1DA1F2),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
+                  ),
+                  onPressed: _onSave,
+                  child: const Text('Save'),
+                ),
+                const SizedBox(width: 16),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

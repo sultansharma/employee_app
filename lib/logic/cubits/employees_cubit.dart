@@ -1,27 +1,27 @@
 import 'package:employee_app/core/const.dart';
 import 'package:employee_app/core/widgets/myToast.dart';
 import 'package:employee_app/custom_date_picker/widgets/date_picker_helper.dart';
-import 'package:employee_app/data/database/isar.dart';
-
+import 'package:employee_app/data/database/localstore.dart';
 import 'package:employee_app/logic/cubits/employees_state.dart';
 import 'package:employee_app/ui/widget/select_role.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:isar/isar.dart';
+//import 'package:isar/isar.dart';
 
 import '../../custom_date_picker/date_picker.dart';
 import '../../data/models/employee.dart';
 
 class EmployeesCubit extends Cubit<EmployeesState> {
   EmployeesCubit() : super(EmployeesLoadingState());
-  final db = DatabaseService.db;
+  //final db = DatabaseService.db;
+  //DatabaseService database = DatabaseService(); // Access the Hive box
   Employee? _recentlyDeletedEmployee;
-  int? editingId; //Only For desktop
+  String? editingId; //Only For desktop
 
   getEmployees() async {
-    emit(EmployeesLoadingState());
+    // emit(EmployeesLoadingState());
     try {
-      List<Employee> employees = await db.employees.where().findAll();
+      List<Employee> employees = await DatabaseService.getAllEmployees();
       emit(EmployeesLoadedState(employees));
     } catch (e) {
       emit(EmployeesErrorState('Error loading employees: $e'));
@@ -29,7 +29,6 @@ class EmployeesCubit extends Cubit<EmployeesState> {
   }
 
   Future<Employee?> addEmployee() async {
-    print("Editing Id" + editingId.toString());
     if (validateInputs()) {
       final employee = Employee(
           name: empNameController.text,
@@ -37,7 +36,7 @@ class EmployeesCubit extends Cubit<EmployeesState> {
           startDate: startDate,
           endDate: endDate);
       try {
-        await db.writeTxn(() async => await db.employees.put(employee));
+        await DatabaseService.saveEmployee(employee);
         emit(EmployeeOperationAddedState());
         await getEmployees();
       } catch (e) {
@@ -50,19 +49,18 @@ class EmployeesCubit extends Cubit<EmployeesState> {
     }
   }
 
-  Future<bool> updateEmployee(int id) async {
+  Future<bool> updateEmployee(String id) async {
     editingId = id; //Only for desktop
     if (validateInputs()) {
       try {
-        final employee = await db.employees.get(id);
+        final employee = await DatabaseService.getEmployee(id);
         if (employee != null) {
+          employee.id = id;
           employee.name = empNameController.text;
           employee.role = roleController.text;
           employee.startDate = startDate;
           employee.endDate = endDate;
-          await db.writeTxn(() async {
-            await db.employees.put(employee);
-          });
+          await DatabaseService.saveEmployee(employee);
         }
         emit(EmployeeOperationUpdatedState());
         await getEmployees();
@@ -76,12 +74,16 @@ class EmployeesCubit extends Cubit<EmployeesState> {
     return false;
   }
 
-  Future<void> deleteEmployee(int id) async {
+  Future<void> deleteEmployee(String id) async {
     try {
-      _recentlyDeletedEmployee = await db.employees.get(id);
-      await db.writeTxn<bool>(() async => await db.employees.delete(id));
+      _recentlyDeletedEmployee = await DatabaseService.getEmployee(id);
+      await DatabaseService.deleteEmployee(id);
       emit(EmployeeDeletedState());
       await getEmployees();
+      if (editingId == id) {
+        editingId = null;
+        resetForm();
+      }
     } catch (e) {
       emit(EmployeeOperationErrorState('Error deleting employees: $e'));
     }
@@ -152,7 +154,9 @@ class EmployeesCubit extends Cubit<EmployeesState> {
   void onRoleSelected(BuildContext context) async {
     var role = await showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16), topRight: Radius.circular(16))),
       builder: (context) => SelectRole(),
     );
     if (role != null) roleController.text = role;

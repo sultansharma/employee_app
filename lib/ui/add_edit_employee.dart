@@ -1,6 +1,5 @@
 import 'package:employee_app/core/widgets/myToast.dart';
 import 'package:employee_app/core/widgets/inputDecoration.dart';
-import 'package:employee_app/custom_date_picker/widgets/date_picker_helper.dart';
 import 'package:employee_app/data/models/employee.dart';
 import 'package:employee_app/logic/cubits/employees_state.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +59,7 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
     if (_isEditing) {
       final employee = await context
           .read<EmployeesCubit>()
-          .updateEmployee(widget.employee!.id);
+          .updateEmployee(widget.employee!.id.toString());
 
       if (mounted && employee) {
         Navigator.of(context).pop();
@@ -90,7 +89,7 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
           if (_isEditing) ...[
             IconButton(
               onPressed: () async {
-                await cubit.deleteEmployee(widget.employee!.id);
+                await cubit.deleteEmployee(widget.employee!.id.toString());
                 Navigator.of(context).pop();
               },
               icon: SvgPicture.asset(AppAssets.removeIcon),
@@ -206,7 +205,7 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
-                        backgroundColor: const Color(0xFF1DA1F2),
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4)),
