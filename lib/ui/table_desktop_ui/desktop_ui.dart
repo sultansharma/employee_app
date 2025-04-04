@@ -104,88 +104,83 @@ class _DesktopUiState extends State<DesktopUi> {
                       children: [
                         SingleChildScrollView(
                           child: Container(
-                            //height: MediaQuery.of(context).size.height,
-                            child: Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (currentEmployee.isEmpty &&
-                                      previousEmployee.isEmpty)
-                                    SizedBox(
-                                      width: MediaQuery.sizeOf(context).width,
-                                      height: MediaQuery.sizeOf(context).height,
-                                      child: Center(
-                                        child: Image.asset(
-                                          AppAssets.noEmployee,
-                                          height: 200,
-                                        ),
+                            //height: MediaQuery.of(context).size.height-100,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (currentEmployee.isEmpty &&
+                                    previousEmployee.isEmpty)
+                                  SizedBox(
+                                    width: MediaQuery.sizeOf(context).width,
+                                    height: MediaQuery.sizeOf(context).height,
+                                    child: Center(
+                                      child: Image.asset(
+                                        AppAssets.noEmployee,
+                                        height: 200,
                                       ),
                                     ),
-                                  if (currentEmployee.isNotEmpty) ...[
-                                    header(AppStrings.curEmployees),
-                                    ListView.separated(
-                                      primary: false,
-                                      shrinkWrap: true,
-                                      padding: EdgeInsets.zero,
-                                      itemCount: currentEmployee.length,
-                                      separatorBuilder: (_, __) => Divider(
-                                          height: 0,
-                                          color: Colors.grey.shade200),
-                                      itemBuilder: (_, int index) {
-                                        final employee = currentEmployee[index];
+                                  ),
+                                if (currentEmployee.isNotEmpty) ...[
+                                  header(AppStrings.curEmployees),
+                                  ListView.separated(
+                                    primary: false,
+                                    shrinkWrap: true,
+                                    padding: EdgeInsets.zero,
+                                    itemCount: currentEmployee.length,
+                                    separatorBuilder: (_, __) => Divider(
+                                        height: 0, color: Colors.grey.shade200),
+                                    itemBuilder: (_, int index) {
+                                      final employee = currentEmployee[index];
 
-                                        return EmployeeCard(
-                                          employee: employee,
-                                          bgColor:
-                                              cubit.editingId != employee.id
-                                                  ? Colors.grey.shade50
-                                                  : null,
-                                          onEdit: () {
-                                            _selectEditEmployee(employee);
-                                          },
-                                          onDelete: () async {
-                                            await context
-                                                .read<EmployeesCubit>()
-                                                .deleteEmployee(
-                                                    employee.id.toString());
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                  if (previousEmployee.isNotEmpty) ...[
-                                    header(AppStrings.prevEmployees),
-                                    ListView.separated(
-                                      primary: false,
-                                      shrinkWrap: true,
-                                      padding: EdgeInsets.zero,
-                                      itemCount: previousEmployee.length,
-                                      separatorBuilder: (_, __) => Divider(
-                                          height: 0,
-                                          color: Colors.grey.shade200),
-                                      itemBuilder: (_, int index) {
-                                        final employee =
-                                            previousEmployee[index];
+                                      return EmployeeCard(
+                                        employee: employee,
+                                        bgColor: cubit.editingId != employee.id
+                                            ? Colors.grey.shade50
+                                            : null,
+                                        onEdit: () {
+                                          _selectEditEmployee(employee);
+                                        },
+                                        onDelete: () async {
+                                          await context
+                                              .read<EmployeesCubit>()
+                                              .deleteEmployee(
+                                                  employee.id.toString());
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ],
+                                if (previousEmployee.isNotEmpty) ...[
+                                  header(AppStrings.prevEmployees),
+                                  ListView.separated(
+                                    primary: false,
+                                    shrinkWrap: true,
+                                    padding: EdgeInsets.zero,
+                                    itemCount: previousEmployee.length,
+                                    separatorBuilder: (_, __) => Divider(
+                                        height: 0, color: Colors.grey.shade200),
+                                    itemBuilder: (_, int index) {
+                                      final employee = previousEmployee[index];
 
-                                        return EmployeeCard(
-                                          employee: employee,
-                                          bgColor:
-                                              cubit.editingId != employee.id
-                                                  ? Colors.grey.shade50
-                                                  : null,
-                                          onEdit: () {
-                                            _selectEditEmployee(employee);
-                                          },
-                                          onDelete: () {
-                                            context
-                                                .read<EmployeesCubit>()
-                                                .deleteEmployee(
-                                                    employee.id.toString());
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  ],
+                                      return EmployeeCard(
+                                        employee: employee,
+                                        bgColor: cubit.editingId != employee.id
+                                            ? Colors.grey.shade50
+                                            : null,
+                                        onEdit: () {
+                                          _selectEditEmployee(employee);
+                                        },
+                                        onDelete: () {
+                                          context
+                                              .read<EmployeesCubit>()
+                                              .deleteEmployee(
+                                                  employee.id.toString());
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ],
+                                if (state.employees.isNotEmpty)
                                   const Padding(
                                     padding: EdgeInsets.all(16.0),
                                     child: Text('Swipe left to delete',
@@ -193,8 +188,7 @@ class _DesktopUiState extends State<DesktopUi> {
                                             color: Colors
                                                 .grey)), // Adds the message
                                   ),
-                                ],
-                              ),
+                              ],
                             ),
                           ),
                         ),
