@@ -1,4 +1,5 @@
 import 'package:employee_app/core/const.dart';
+import 'package:employee_app/core/widgets/addaptiveText.dart';
 import 'package:employee_app/data/models/employee.dart';
 import 'package:employee_app/ui/widget/from_to_date.dart';
 import 'package:flutter/material.dart';
@@ -58,23 +59,29 @@ class EmployeeCard extends StatelessWidget {
             children: [
               Text(
                 employee.name ?? "N/A",
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.black,
-                  fontSize: 16,
+                  fontSize: adaptiveText(
+                    context,
+                    //extra: 1,
+                  ),
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 employee.role ?? "N/A",
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.subTitle,
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: adaptiveText(
+                    context,
+                    extra: -1,
+                  ),
                 ),
               ),
               const SizedBox(height: 4),
-              getFromToDate(employee.startDate, employee.endDate)
+              getFromToDate(context, employee.startDate, employee.endDate)
             ],
           ),
         ),

@@ -1,4 +1,5 @@
 import 'package:employee_app/core/const.dart';
+import 'package:employee_app/core/widgets/addaptiveText.dart';
 import 'package:employee_app/custom_date_picker/widgets/date_picker_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -51,16 +52,16 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       insetPadding: EdgeInsets.symmetric(horizontal: 16),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 350),
+        constraints: const BoxConstraints(maxWidth: 450),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(adaptiveSp(context, factor: 1.5)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              16.verticalSpace,
+              10.sp.verticalSpace,
               widget.isStartDate ? startDateOptions() : endDateOptions(),
               calendarView(context),
-              16.verticalSpace,
+              10.sp.verticalSpace,
               footerSection(context)
             ],
           ),
@@ -71,9 +72,9 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
 
   Widget startDateOptions() {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Expanded(
               child: _button(
@@ -87,10 +88,9 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
                 },
               ),
             ),
-            const SizedBox(
-              width: 8,
+            SizedBox(
+              width: 13.h,
             ),
-            // 16.horizontalSpace,
             Expanded(
               child: _button(
                 selected: nextMondaySelected,
@@ -105,9 +105,7 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
             ),
           ],
         ),
-        const SizedBox(
-          height: 8,
-        ),
+        SizedBox(height: 6.h),
         Row(
           children: [
             Expanded(
@@ -122,8 +120,8 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
                 },
               ),
             ),
-            const SizedBox(
-              width: 8,
+            SizedBox(
+              width: 13.h,
             ),
             Expanded(
               child: _button(
@@ -158,8 +156,8 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
             },
           ),
         ),
-        const SizedBox(
-          width: 8,
+        SizedBox(
+          width: 13.h,
         ),
         Expanded(
           child: _button(
@@ -234,6 +232,7 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
         headerStyle: HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
+
           headerPadding: const EdgeInsets.symmetric(
             horizontal: 70,
           ),
@@ -274,7 +273,7 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
                     },
                   ),
                   const SizedBox(
-                    width: 8,
+                    width: 10,
                   ),
                   _button(
                     selected: true,
@@ -306,7 +305,8 @@ class _DateSelectorDialogeState extends State<DateSelectorDialoge> {
       child: Text(
         text.toString(),
         style: TextStyle(
-            fontSize: 12, color: selected ? Colors.white : AppColors.primary),
+            fontSize: adaptiveSp(context),
+            color: selected ? Colors.white : AppColors.primary),
       ),
     );
   }

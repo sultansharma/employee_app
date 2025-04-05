@@ -1,9 +1,11 @@
 import 'package:employee_app/core/const.dart';
+import 'package:employee_app/core/widgets/addaptiveText.dart';
 import 'package:employee_app/core/widgets/myToast.dart';
 import 'package:employee_app/core/widgets/inputDecoration.dart';
 import 'package:employee_app/data/models/employee.dart';
 import 'package:employee_app/logic/cubits/employees_cubit.dart';
 import 'package:employee_app/logic/cubits/employees_state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -79,10 +81,16 @@ class _DesktopAddEditState extends State<DesktopAddEdit> {
           backgroundColor: Colors.white,
           appBar: AppBar(
             centerTitle: false,
-            toolbarHeight: 48,
+            toolbarHeight: kIsWeb ? 48.0 : null,
+            // toolbarHeight: 49,
             backgroundColor: AppColors.border,
             automaticallyImplyLeading: false,
-            titleTextStyle: const TextStyle(color: Colors.black, fontSize: 15),
+            titleTextStyle: TextStyle(
+                color: Colors.black,
+                fontSize: adaptiveText(
+                  context,
+                  // extra: 2,
+                )),
             title: Text(cubit.editingId != null
                 ? 'Edit Employee Details'
                 : 'Add Employee'),

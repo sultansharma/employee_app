@@ -1,4 +1,5 @@
 import 'package:employee_app/core/const.dart';
+import 'package:employee_app/core/widgets/addaptiveText.dart';
 import 'package:employee_app/core/widgets/myToast.dart';
 import 'package:employee_app/custom_date_picker/date_picker.dart';
 import 'package:employee_app/data/models/employee.dart';
@@ -35,14 +36,23 @@ class AllEmployees extends StatelessWidget {
       appBar: AppBar(
         centerTitle: false,
         backgroundColor: AppColors.primary,
-        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 22),
+        titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+            fontSize: adaptiveText(
+              context,
+              extra: 4,
+            )),
         title: const Text('Employee List'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openEmployeeFormScreen(context),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
+        child: Icon(
+          Icons.add,
+          size: adaptiveSp(context, factor: 1.5),
+        ),
       ),
       body: BlocConsumer<EmployeesCubit, EmployeesState>(
         listener: (context, state) {
@@ -103,7 +113,7 @@ class AllEmployees extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (currentEmployee.isNotEmpty) ...[
-                    header(AppStrings.curEmployees),
+                    header(context, AppStrings.curEmployees),
                     ListView.separated(
                       primary: false,
                       shrinkWrap: true,
@@ -133,7 +143,7 @@ class AllEmployees extends StatelessWidget {
                     ),
                   ],
                   if (previousEmployee.isNotEmpty) ...[
-                    header(AppStrings.prevEmployees),
+                    header(context, AppStrings.prevEmployees),
                     ListView.separated(
                       primary: false,
                       shrinkWrap: true,

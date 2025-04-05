@@ -1,3 +1,4 @@
+import 'package:employee_app/core/widgets/addaptiveText.dart';
 import 'package:employee_app/ui/table_desktop_ui/desktop_add_edit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:employee_app/logic/cubits/employees_state.dart';
 import 'package:employee_app/ui/widget/employee_card.dart';
 import 'package:employee_app/core/const.dart';
 import 'package:employee_app/core/widgets/myToast.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DesktopUi extends StatefulWidget {
   const DesktopUi({super.key});
@@ -24,11 +26,13 @@ class _DesktopUiState extends State<DesktopUi> {
     context.read<EmployeesCubit>().onEditTapped(employee);
     setState(() {
       _selectedEmployee = employee;
+      _addEmployee = false;
     });
   }
 
   void _selectAddEmployee() {
     context.read<EmployeesCubit>().resetForm();
+    context.read<EmployeesCubit>().editingId = null;
     setState(() {
       _addEmployee = !_addEmployee;
     });
@@ -49,8 +53,11 @@ class _DesktopUiState extends State<DesktopUi> {
       appBar: AppBar(
         centerTitle: false,
         backgroundColor: AppColors.primary,
-        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 22),
-        title: const Text('Employee Management'),
+        titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+            fontSize: adaptiveText(context)),
+        title: const Text('Employee List'),
       ),
       body: Row(
         children: [
@@ -121,7 +128,7 @@ class _DesktopUiState extends State<DesktopUi> {
                                     ),
                                   ),
                                 if (currentEmployee.isNotEmpty) ...[
-                                  header(AppStrings.curEmployees),
+                                  header(context, AppStrings.curEmployees),
                                   ListView.separated(
                                     primary: false,
                                     shrinkWrap: true,
@@ -151,7 +158,7 @@ class _DesktopUiState extends State<DesktopUi> {
                                   ),
                                 ],
                                 if (previousEmployee.isNotEmpty) ...[
-                                  header(AppStrings.prevEmployees),
+                                  header(context, AppStrings.prevEmployees),
                                   ListView.separated(
                                     primary: false,
                                     shrinkWrap: true,
@@ -181,9 +188,9 @@ class _DesktopUiState extends State<DesktopUi> {
                                   ),
                                 ],
                                 if (state.employees.isNotEmpty)
-                                  const Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Text('Swipe left to delete',
+                                  Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: Text(AppStrings.toDelete,
                                         style: TextStyle(
                                             color: Colors
                                                 .grey)), // Adds the message
@@ -199,8 +206,9 @@ class _DesktopUiState extends State<DesktopUi> {
                             onPressed: () => _selectAddEmployee(),
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
-                            child:
-                                Icon(_addEmployee ? Icons.remove : Icons.add),
+                            child: Icon(_addEmployee && cubit.editingId == null
+                                ? Icons.remove
+                                : Icons.add),
                           ),
                         )
                       ],
@@ -214,7 +222,7 @@ class _DesktopUiState extends State<DesktopUi> {
           ),
 
           // Right Panel: Employee Form
-          if (_selectedEmployee != null || _addEmployee) ...[
+          if (cubit.editingId != null || _addEmployee) ...[
             Expanded(
               flex: 2,
               child: DesktopAddEdit(employee: _selectedEmployee),

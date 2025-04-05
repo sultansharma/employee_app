@@ -1,3 +1,4 @@
+import 'package:employee_app/core/widgets/addaptiveText.dart';
 import 'package:employee_app/core/widgets/myToast.dart';
 import 'package:employee_app/core/widgets/inputDecoration.dart';
 import 'package:employee_app/data/models/employee.dart';
@@ -83,7 +84,12 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
         backgroundColor: AppColors.primary,
         automaticallyImplyLeading: false,
         // iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 22),
+        titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: adaptiveText(
+              context,
+              extra: 4,
+            )),
         title: Text('${_isEditing ? 'Edit' : 'Add'} Employee Details'),
         actions: [
           if (_isEditing) ...[
@@ -116,6 +122,7 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                       children: [
                         TextFormField(
                           controller: cubit.empNameController,
+                          style: TextStyle(fontSize: adaptiveText(context)),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter a name';
@@ -133,6 +140,7 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                           onTap: () => _showRoleBottomSheet(context),
                           child: AbsorbPointer(
                             child: TextFormField(
+                              style: TextStyle(fontSize: adaptiveText(context)),
                               controller: cubit.roleController,
                               decoration: inputDecoration(AppAssets.jobRoleIcon,
                                       sIcon: AppAssets.arrowDownIcon)
@@ -147,7 +155,8 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                               child: TextFormField(
                                 onTap: _selectStartDate,
                                 readOnly: true,
-                                style: const TextStyle(fontSize: 14),
+                                style:
+                                    TextStyle(fontSize: adaptiveText(context)),
                                 controller: cubit.startDateController,
                                 decoration:
                                     inputDecoration(AppAssets.calendarIcon)
@@ -166,7 +175,8 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                                 onTap: _selectEndDate,
                                 readOnly: true,
                                 controller: cubit.endDateController,
-                                style: const TextStyle(fontSize: 14),
+                                style:
+                                    TextStyle(fontSize: adaptiveText(context)),
                                 decoration:
                                     inputDecoration(AppAssets.calendarIcon)
                                         .copyWith(hintText: 'No Date'),
@@ -199,7 +209,12 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                             borderRadius: BorderRadius.circular(4)),
                       ),
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontSize: adaptiveText(context),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 16),
                     ElevatedButton(
@@ -211,7 +226,12 @@ class _AddEditEmployeeState extends State<AddEditEmployee> {
                             borderRadius: BorderRadius.circular(4)),
                       ),
                       onPressed: _onSave,
-                      child: const Text('Save'),
+                      child: Text(
+                        'Save',
+                        style: TextStyle(
+                          fontSize: adaptiveText(context),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 16),
                   ],

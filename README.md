@@ -3,6 +3,8 @@
 A Flutter-based employee management application with local database storage and state management.
 
 ---
+![App Screenshot](/screenshot.png)
+![App Screenshot](/screenshot2.png)
 
 ## 🚀 Project Timeline
 
